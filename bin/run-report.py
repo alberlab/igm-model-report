@@ -49,6 +49,7 @@ from alabtools.plots import plot_comparison, red, plot_by_chromosome
 from scipy.stats import pearsonr
 from matplotlib.patches import Circle
 
+from igm.steps.DamidActivationDistanceStep import snormsq_ellipse
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -96,7 +97,8 @@ def plot_violation_histogram(h, edges, tol=0.05, nticks=20, title='', outfile=No
     tick_pos.append(len(h) + tick_step + 0.5)
     tick_labels.append('>{:.2f}'.format(edges[-2]))
 
-    vmax = np.max(h) * 1.1
+    # ignore the first bin to determine height
+    vmax = np.max(h[1:]) * 1.1
 
     plt.title(title)
 
@@ -231,6 +233,11 @@ def radial_plot_p(edges, val, **kwargs):
         c = Circle((0, 0), edges[i + 1], facecolor=get_color(val[i]))
         ax.add_patch(c)
 
+def snormsq_ellipse(x, semiaxes, r):
+    a, b, c = np.array(semiaxes) - r
+    sq = np.square(x)
+    return sq[:, 0]/(a**2) + sq[:, 1]/(b**2) + sq[:, 2]/(c**2)
+
 # read options
 parser = argparse.ArgumentParser(description='Run population analysis pipeline')
 
@@ -240,6 +247,10 @@ parser.add_argument('-c', '--config', help='Config file for IGM run (infers some
 parser.add_argument('--hic', help='Input probability matrix for HiC')
 parser.add_argument('--hic-sigma', type=float, default=0.01, help='Probability cutoff for HiC')
 parser.add_argument('--hic-contact-range', type=float, default=2.0, help='Probability cutoff for HiC')
+
+parser.add_argument('--damid', help='Input probability matrix for DamID')
+parser.add_argument('--damid-sigma', type=float, default=0.01, help='Probability cutoff for DamID')
+parser.add_argument('--damid-contact-range', type=float, default=0.05, help='Probability cutoff for DamID')
 
 parser.add_argument('--violation-tolerance', type=float, default=0.05, help='Violation tolerance')
 
@@ -480,6 +491,58 @@ try:
             plt.figure()
             radial_plot_p(edges, counts/volumes)
             plt.savefig('radial_density/circular_plot.pdf')
+
+    except:
+        traceback.print_exc()
+        logger.error('Error in radials step\n==============================')
+
+    # Damid
+    # =====
+
+    try:
+        if args.damid:
+            create_folder("damid")
+            damid_profile = np.loadtxt(args.damid, dtype='float32')
+
+            with HssFile(hssfname, 'r') as hss:
+                genome = hss.genome
+                index = hss.index
+                radii = hss.radii
+                if semiaxes is None:
+                    # see if we have information about semiaxes in the file
+                    try:
+                        semiaxes = hss['envelope']['params'][()]
+                        if len(semiaxes.shape) == 0:  # is scalar
+                            semiaxes = np.array([semiaxes, semiaxes, semiaxes])
+                    except:
+                        semiaxes = np.array([5000., 5000., 5000.])
+
+                out_damid_prob = np.zeros(len(index.copy_index))
+                for locid in index.copy_index.keys():
+                    ii = index.copy_index[locid]
+                    n_copies = len(ii)
+
+                    r = radii[ii[0]]
+
+                    # rescale pwish considering the number of copies
+                    # pwish = np.clip(pwish/n_copies, 0, 1)
+
+                    d_sq = np.empty(n_copies * hss.nstruct)
+
+                    for i in range(n_copies):
+                        x = hss.get_bead_crd(ii[i])
+                        R = np.array(semiaxes) * (1 - args.damid_contact_range)
+                        d_sq[i * hss.nstruct:(i + 1) * hss.nstruct] = snormsq_ellipse(x, R, r)
+
+                    contact_count = np.count_nonzero(d_sq >= 1)
+                    out_damid_prob[locid] = float(contact_count) / hss.nstruct / n_copies
+
+                plt.figure(figsize=(10,10))
+                plt.title('DamID')
+                plt.scatter(damid_profile, out_damid_prob, s=6)
+                plt.xlabel('input')
+                plt.ylabel('output')
+
 
     except:
         traceback.print_exc()
