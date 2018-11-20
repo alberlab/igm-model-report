@@ -255,7 +255,7 @@ args = parser.parse_args()
 # load stuff
 
 hssfname = os.path.realpath(args.hss)
-cm = args.hic
+cm = os.path.abspath(args.hic)
 sigma = args.hic_sigma
 hic_contact_range = args.hic_contact_range
 tol = args.violation_tolerance
