@@ -317,10 +317,10 @@ if damid_file:
 if args.hic_sigma is not None:
     sigma = args.hic_sigma
 
-if args.damid_contact_range is not None:
+if damid_contact_range is False:
     damid_contact_range = args.damid_contact_range
 
-if args.hic_contact_range is not None:
+if hic_contact_range is False:
     hic_contact_range = args.hic_contact_range
 
 if args.violation_tolerance is not None:
@@ -402,6 +402,7 @@ try:
             sigma
             cm = Contactmatrix(cm)
             create_folder("matrix_comparison")
+            print(hic_contact_range)
             outmap = get_simulated_hic(hssfname, float(hic_contact_range))
             outmap.save("matrix_comparison/outmap.hcs")
 
@@ -420,7 +421,7 @@ try:
                 mask = x1d > sigma
                 corrs_imposed.append(pearsonr(x1d[mask].ravel(), x2d[mask].ravel())[0])
 
-                plot_comparison(Contactmatrix(x1d), Contactmatrix(x2d), file='matrix_comparison/{}.pdf'.format(c),
+                plot_comparison(x1, x2, file='matrix_comparison/{}.pdf'.format(c),
                                 labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
 
             with open('matrix_comparison/correlations.txt', 'w') as f:
@@ -626,3 +627,4 @@ try:
 
 finally:
     os.chdir(call_dir)
+
