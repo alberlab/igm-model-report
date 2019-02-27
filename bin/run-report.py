@@ -122,7 +122,7 @@ def plot_violation_histogram(h, edges, tol=0.05, nticks=20, title='', outfile=No
         plt.savefig(outfile)
 
 
-def logloghist2d(d1, d2, bins=(100, 100), ranges=[(1e-3, 1), (1e-3, 1)], outfile=None, vmin=1e2, vmax=1e5, nlevels=5, sigma=None, **kwargs):
+def logloghist2d(d1, d2, bins=(100, 100), ranges=[(1e-3, 1), (1e-3, 1)], outfile=None, vmin=1e2, vmax=1e5, nlevels=5, sigma=None, xlabel='in', ylabel='out', **kwargs):
     from matplotlib.colors import LogNorm
 
     if ranges[0] is None:
@@ -150,8 +150,8 @@ def logloghist2d(d1, d2, bins=(100, 100), ranges=[(1e-3, 1), (1e-3, 1)], outfile
         plt.axvline(x=sigma, ls='--', c='green')
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('in')
-    plt.ylabel('out')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.tight_layout()
     if outfile is not None:
         plt.savefig(outfile)
