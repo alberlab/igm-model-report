@@ -83,7 +83,7 @@ def report_violations(hssfname, violation_tolerance):
                                      outfile="violations/histograms/{}.pdf".format(k))
 
         # TODO: energies and stuff
-
+        logger.info('Done.')
     except:
         traceback.print_exc()
         logger.error('Error trying to compute violation statistics\n==============================')

@@ -54,6 +54,7 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None):
             plt.xlabel('input')
             plt.ylabel('output')
             plt.savefig('damid/scatter.pdf')
+        logger.info('Done.')
 
     except:
         traceback.print_exc()

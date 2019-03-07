@@ -1,4 +1,4 @@
-from numpy import np
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from matplotlib.colors import Colormap

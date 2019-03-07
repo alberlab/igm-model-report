@@ -83,7 +83,7 @@ def report_radius_of_gyration(hssfname):
             rgs = get_chroms_rgs(hss.coordinates, hss.index)
             np.savez('radius_of_gyration/chromosomes.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
         boxplots_group(rgs, chroms, outfile='radius_of_gyration/rgs.pdf')
-
+        logger.info('Done.')
     except:
         traceback.print_exc()
         logger.error('Error in radius of gyration step\n==============================')

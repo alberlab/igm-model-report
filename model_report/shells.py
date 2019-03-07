@@ -27,7 +27,7 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150):
             kth = [int(k * n / nshell) for k in range(0, nshell)]
             bds = kth + [n]
             ave_shell_rad = np.empty((hss.nstruct, nshell))
-            pos_histos = np.zeros(nshell, hnbins)
+            pos_histos = np.zeros((nshell, hnbins))
             for i in range(hss.nstruct):
                 radials = np.sqrt(np.sum(np.square(crd[i] / semiaxes), axis=1))
                 radials = np.partition(radials, kth)
@@ -43,7 +43,7 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150):
             for j in range(nshell):
                 plt.bar(midpoints, height=pos_histos[j], alpha=.6, width=hvmax/hnbins, label='shell {:d}'.format(j+1))
             plt.savefig('shells/positions_histograms_by_shell.pdf')
-
+        logger.info('Done.')
     except:
         traceback.print_exc()
         logger.error('Error in shells step\n==============================')
