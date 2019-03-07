@@ -285,7 +285,7 @@ args = parser.parse_args()
 # load stuff
 tol = 0.05
 damid_file = None
-cm = None
+cm = False
 if not args.no_config:
     logger.info('Reading config from: %s' % args.config)
     cfg = Config(args.config)
@@ -395,7 +395,7 @@ try:
 
     # Compare matrices
     # ================
-    if 'hic' in steps and cm is not None:
+    if 'hic' in steps and cm:
 
         logger.info('Step: hic')
         try:
