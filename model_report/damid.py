@@ -6,7 +6,7 @@ from alabtools import HssFile
 from .utils import create_folder, snormsq_ellipse
 
 
-def report_damid(hssfname, contact_range, semiaxes=None):
+def report_damid(hssfname, damid_file, contact_range, semiaxes=None):
     logger = logging.getLogger("DamID")
     logger.info('Executing DamID report')
     try:

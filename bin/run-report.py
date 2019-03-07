@@ -83,31 +83,67 @@ parser.add_argument('-o', '--out-dir', help='Output directory')
 args = parser.parse_args()
 
 
-# load stuff
-tol = 0.05
-damid_file = None
-cm = None
+# get the absolute filename
+hssfname = os.path.realpath(args.hss)
+
+
+# we need some parameters info about the file. There are several ways to obtain it: one is to write
+# it directly on the file, and I just pushed a commit to do that on igm.
+# If we don't find the data on the file itself, we may read it from a configuration file, or from the step
+# database.
+
+def get_parameters_from_igm_config(cfg):
+    report_config = {
+        'hic': {},
+        'damid': {},
+    }
+    report_config['hic'] = cfg.get('restraints/Hi-C')
+    report_config['damid'] = cfg.get('restraints/DamID')
+    report_config['tol'] = cfg.get('optimization/violation_tolerance', 0.05)
+
+    # check if we have runtime information in this config
+    if 'runtime' in cfg:
+        if cfg.get('runtime/Hi-C/sigma', False):
+            report_config['hic']['inter_sigma'] = cfg.get('runtime/Hi-C/sigma')
+            report_config['hic']['intra_sigma'] = cfg.get('runtime/Hi-C/sigma')
+
+    # try to figure out info from the database file
+
+    # if it fails, try to guess a sigma directly from the config
+    if cfg.get('restraints/Hi-C/sigma_list', False):  # old style sigma lists
+        report_config['hic']['inter_sigma'] = cfg.get('restraints/Hi-C/sigma_list')[-1]
+        report_config['hic']['intra_sigma'] = cfg.get('restraints/Hi-C/sigma_list')[-1]
+    if cfg.get('restraints/Hi-C/inter_sigma_list', False):  # new style
+        l1 = cfg.get('restraints/Hi-C/inter_sigma_list', False)
+        l2 = cfg.get('restraints/Hi-C/intra_sigma_list', False)
+        report_config['hic']['sigm'] = cfg.get('restraints/Hi-C/sigma_list')[-1]
+
+
+# unless otherwise specified, we read details from a config file
 if not args.no_config:
     logger.info('Reading config from: %s' % args.config)
     cfg = Config(args.config)
-    cm = cfg.get('restraints/Hi-C/input_matrix', False)
-    hic_contact_range = cfg.get('restraints/Hi-C/contact_range', False)
-    damid_file = cfg.get('restraints/DamID/input_profile', False)
-    damid_contact_range = cfg.get('restraints/DamID/contact_range', False)
-    tol = cfg.get('optimization/violation_tolerance', 0.05)
+    parm = get_parameters_from_igm_config(cfg)
 
-hssfname = os.path.realpath(args.hss)
-
+# if not specified, set a default output directory
 if args.out_dir is None:
     d, f = os.path.split(hssfname)
     b, e = os.path.splitext(f)
     args.out_dir = os.path.join(d, 'QC_' + b)
 
+# overwrite arguments if specified from command line
 if args.hic is not None:
-    cm = args.hic
+    report_config['hic']['input_matrix'] = args.hic
 
 if args.damid is not None:
-    damid_file = args.damid
+    report_config['damid']['input_profile'] = args.damid
+
+
+
+
+if args.hic_sigma is not None:
+    sigma = args.hic_sigma
+
 
 if cm:
     cm = os.path.abspath(cm)
@@ -115,8 +151,6 @@ if cm:
 if damid_file:
     damid_file = os.path.abspath(damid_file)
 
-if args.hic_sigma is not None:
-    sigma = args.hic_sigma
 
 if damid_contact_range is False:
     damid_contact_range = args.damid_contact_range
@@ -165,108 +199,12 @@ try:
     # Damid
     # =====
     if 'damid' in steps:
-
-        logger.info('Step: damid')
-        try:
-            create_folder("damid")
-
-            with HssFile(hssfname, 'r') as hss:
-                genome = hss.genome
-                index = hss.index
-                radii = hss.radii
-                if semiaxes is None:
-                    # see if we have information about semiaxes in the file
-                    try:
-                        semiaxes = hss['envelope']['params'][()]
-                        if len(semiaxes.shape) == 0:  # is scalar
-                            semiaxes = np.array([semiaxes, semiaxes, semiaxes])
-                    except:
-                        semiaxes = np.array([5000., 5000., 5000.])
-
-                out_damid_prob = np.zeros(len(index.copy_index))
-                for locid in index.copy_index.keys():
-                    ii = index.copy_index[locid]
-                    n_copies = len(ii)
-
-                    r = radii[ii[0]]
-
-                    # rescale pwish considering the number of copies
-                    # pwish = np.clip(pwish/n_copies, 0, 1)
-
-                    d_sq = np.empty(n_copies * hss.nstruct)
-
-                    for i in range(n_copies):
-                        x = hss.get_bead_crd(ii[i])
-                        R = np.array(semiaxes) * (1 - damid_contact_range)
-                        d_sq[i * hss.nstruct:(i + 1) * hss.nstruct] = snormsq_ellipse(x, R, r)
-
-                    contact_count = np.count_nonzero(d_sq >= 1)
-                    out_damid_prob[locid] = float(contact_count) / hss.nstruct / n_copies
-                np.savetxt('damid/output.txt', out_damid_prob)
-
-            if damid_file:
-                damid_profile = np.loadtxt(damid_file, dtype='float32')
-                np.savetxt('damid/input.txt', damid_profile)
-                plt.figure(figsize=(10, 10))
-                plt.title('DamID')
-                plt.scatter(damid_profile, out_damid_prob, s=6)
-                plt.xlabel('input')
-                plt.ylabel('output')
-                plt.savefig('damid/scatter.pdf')
-
-        except:
-            traceback.print_exc()
-            logger.error('Error in DamID step\n==============================')
+        pass
 
     # Compare matrices
     # ================
     if 'hic' in steps and cm is not None:
 
-        logger.info('Step: hic')
-        try:
-            sigma
-            cm = Contactmatrix(cm)
-            create_folder("matrix_comparison")
-            print(hic_contact_range)
-            outmap = get_simulated_hic(hssfname, float(hic_contact_range))
-            outmap.save("matrix_comparison/outmap.hcs")
-
-            with HssFile(hssfname, 'r') as hss:
-                genome = hss.genome
-            corrs_all = []
-            corrs_imposed = []
-            for c in genome.chroms:
-                x1 = cm[c]
-                x2 = outmap[c]
-                x1d = x1.matrix.toarray()
-                x2d = x2.matrix.toarray()
-
-                corrs_all.append(pearsonr(x1d.ravel(), x2d.ravel())[0])
-
-                mask = x1d > sigma
-                corrs_imposed.append(pearsonr(x1d[mask].ravel(), x2d[mask].ravel())[0])
-
-                plot_comparison(x1, x2, file='matrix_comparison/{}.pdf'.format(c),
-                                labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
-
-            with open('matrix_comparison/correlations.txt', 'w') as f:
-                f.write('# chrom all imposed\n')
-                for c, x, y in zip(genome.chroms, corrs_all, corrs_imposed):
-                    f.write('{} {} {}\n'.format(c, x, y))
-
-            # create a scatter plot of probabilities:
-            plt.figure(figsize=(10, 10))
-            logloghist2d(
-                cm.matrix.toarray().ravel(),
-                outmap.matrix.toarray().ravel(),
-                bins=(100, 100),
-                outfile='matrix_comparison/histogram2d.pdf',
-                nlevels=10,
-            )
-
-        except:
-            traceback.print_exc()
-            logger.error('Error in matrix comparison step\n==============================')
 
 finally:
     os.chdir(call_dir)
