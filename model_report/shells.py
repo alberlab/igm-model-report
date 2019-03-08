@@ -46,6 +46,11 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_
                 plt.bar(midpoints, height=pos_histos[j], alpha=.6, width=hvmax/hnbins, label='shell {:d}'.format(j+1))
             plt.savefig(f'shells/positions_histograms_by_shell{run_label}.pdf')
         logger.info('Done.')
+
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error in shells step\n==============================')

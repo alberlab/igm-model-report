@@ -69,6 +69,10 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
             plt.savefig(f'damid/scatter{run_label}.pdf')
         logger.info('Done.')
 
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error in DamID step\n==============================')

@@ -96,6 +96,10 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
             plt.savefig(f'radials/radials_norm{run_label}.pdf')
         logger.info('Done.')
 
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error in radials step\n==============================')

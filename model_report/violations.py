@@ -87,6 +87,11 @@ def report_violations(hssfname, violation_tolerance, run_label=''):
 
         # TODO: energies and stuff
         logger.info('Done.')
+
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error trying to compute violation statistics\n==============================')

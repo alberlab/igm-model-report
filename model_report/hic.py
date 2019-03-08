@@ -136,6 +136,10 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
             nlevels=10,
         )
 
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error in HiC step\n==============================')

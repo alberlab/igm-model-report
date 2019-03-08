@@ -87,6 +87,11 @@ def report_radius_of_gyration(hssfname, run_label=''):
             np.savez(f'radius_of_gyration/chromosomes{run_label}.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
         boxplots_group(rgs, chroms, outfile=f'radius_of_gyration/rgs{run_label}.pdf')
         logger.info('Done.')
+
+    except KeyboardInterrupt:
+        logger.error('User interrupt. Exiting.')
+        exit(1)
+
     except:
         traceback.print_exc()
         logger.error('Error in radius of gyration step\n==============================')

@@ -101,7 +101,7 @@ def get_parameters_from_igm_config(cfg: dict, basedir='.') -> dict:
         report_config['hic'] = {}
         fpath = cfg.get('restraints/Hi-C/input_matrix')
         if not op.isabs(fpath):
-            op.abspath(op.join(basedir, fpath))
+            fpath = op.abspath(op.join(basedir, fpath))
         report_config['hic']['input_matrix'] = fpath
         report_config['hic']['contact_range'] = cfg.get('restraints/Hi-C/contact_range')
     if cfg.get('restraints/DamID', False):
@@ -250,7 +250,7 @@ if __name__ == '__main__':
             cpath = op.join(d, 'igm-config.json')
             if op.isfile(cpath):
                 logger.info(f'Reading config from {cpath}')
-                cfg = get_parameters_from_igm_config(Config(cpath))
+                cfg = get_parameters_from_igm_config(Config(cpath), basedir=d)
             else:
                 # we do not have any configuration, let's fall back to an empty one
                 # and leave to the user to actually specify all the parameters
