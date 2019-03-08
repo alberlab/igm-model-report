@@ -56,6 +56,8 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
         with HssFile(hssfname, 'r') as hss:
             genome = hss.genome
 
+        minsigma = None
+
         for c in genome.chroms:
             x1 = cm[c]
             x2 = outmap[c]
@@ -69,6 +71,7 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
                 correlations['intra']['restrained'].append(pearsonr(x1d[mask].ravel(), x2d[mask].ravel())[0])
                 correlations['intra']['non_restrained'].append(pearsonr(x1d[~mask].ravel(), x2d[~mask].ravel())[0])
                 cutoff = intra_sigma
+                minsigma = intra_sigma
             else:
                 # using a large plotting cutoff when nothing is imposed, so that nothing will be shown
                 cutoff = 2.0
@@ -102,6 +105,10 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
                                                                y[intermask & (x < inter_sigma)].ravel())[0]
 
             cutoff = inter_sigma
+            if minsigma:
+                minsigma = min(minsigma, inter_sigma)
+            else:
+                minsigma = inter_sigma
         else:
             # set a large cutoff when nothing is imposed, so that nothing will be shown
             cutoff = 2.0
@@ -128,6 +135,9 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
             bins=(100, 100),
             outfile=f'matrix_comparison/histogram2d{run_label}.pdf',
             nlevels=10,
+            sigma=minsigma,
+            xlabel='INPUT',
+            ylabel='OUTPUT'
         )
 
         plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
@@ -135,7 +145,6 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
         cm.matrix.data[cm.matrix.data < cutoff] = 0
         plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
-
 
     except KeyboardInterrupt:
         logger.error('User interrupt. Exiting.')

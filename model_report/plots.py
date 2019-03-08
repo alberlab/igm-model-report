@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def logloghist2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)), outfile=None, vmin=1e2, vmax=1e5, nlevels=5, sigma=None, **kwargs):
+def logloghist2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)), outfile=None, vmin=1e2, vmax=1e5, nlevels=5,
+                 sigma=None, xlabel='in', ylabel='out', **kwargs):
     from matplotlib.colors import LogNorm
 
     if ranges[0] is None:
@@ -28,10 +29,12 @@ def logloghist2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)), outfile
     p = plt.contourf(X, Y, h, norm=LogNorm(vmin, vmax), cmap='Greys', levels=levels, **kwargs)
     if sigma is not None:
         plt.axvline(x=sigma, ls='--', c='green')
+
+    plt.plot([vmin, vmax], [vmin, vmax], 'k--')
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('in')
-    plt.ylabel('out')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.tight_layout()
     if outfile is not None:
         plt.savefig(outfile)
