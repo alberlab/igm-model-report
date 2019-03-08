@@ -3,12 +3,17 @@ import matplotlib.pyplot as plt
 import logging
 import traceback
 from alabtools import HssFile
+from scipy.stats import pearsonr
 from .utils import create_folder, snormsq_ellipse
 
 
-def report_damid(hssfname, damid_file, contact_range, semiaxes=None):
+# noinspection PyTypeChecker
+def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label=''):
     logger = logging.getLogger("DamID")
     logger.info('Executing DamID report')
+
+    if run_label:
+        run_label = '-' + run_label
     try:
         create_folder("damid")
 
@@ -47,13 +52,21 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None):
 
         if damid_file:
             damid_profile = np.loadtxt(damid_file, dtype='float32')
-            np.savetxt('damid/input.txt', damid_profile)
-            plt.figure(figsize=(10, 10))
-            plt.title('DamID')
+            np.savetxt(f'damid/input{run_label}.txt', damid_profile)
+            plt.figure(figsize=(4, 4))
+            plt.title(f'DamID{run_label}')
+            vmax = max(np.nanmax(damid_profile), np.nanmax(out_damid_prob))
+            vmin = min(np.nanmin(damid_profile), np.nanmin(out_damid_prob))
+            corr = pearsonr(damid_profile, out_damid_prob)
+            np.savetxt(f'damid/pearsonr{run_label}.txt', corr)
             plt.scatter(damid_profile, out_damid_prob, s=6)
+            plt.xlim(vmin, vmax)
+            plt.ylim(vmin, vmax)
+            plt.text(vmin * 1.01, vmax * 0.95, f'pearson correlation: {corr[0]:.5f}')
+            plt.plot([vmin, vmax], [vmin, vmax], 'k--')
             plt.xlabel('input')
             plt.ylabel('output')
-            plt.savefig('damid/scatter.pdf')
+            plt.savefig(f'damid/scatter{run_label}.pdf')
         logger.info('Done.')
 
     except:

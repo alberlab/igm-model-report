@@ -6,7 +6,9 @@ from alabtools import HssFile
 from .utils import create_folder
 
 
-def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150):
+def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_label=''):
+    if run_label:
+        run_label = '-' + run_label
     logger = logging.getLogger('Shells')
 
     try:
@@ -37,12 +39,12 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150):
                     pos_histos[j] += h
                     ave_shell_rad[i][j] = np.average(radials[bds[j]:bds[j + 1]])
 
-            np.savetxt('shells/ave_radial.txt', np.average(ave_shell_rad, axis=0))
+            np.savetxt(f'shells/ave_radial{run_label}.txt', np.average(ave_shell_rad, axis=0))
             midpoints = (edges[:-1] + edges[1:]) / 2
             plt.figure()
             for j in range(nshell):
                 plt.bar(midpoints, height=pos_histos[j], alpha=.6, width=hvmax/hnbins, label='shell {:d}'.format(j+1))
-            plt.savefig('shells/positions_histograms_by_shell.pdf')
+            plt.savefig(f'shells/positions_histograms_by_shell{run_label}.pdf')
         logger.info('Done.')
     except:
         traceback.print_exc()

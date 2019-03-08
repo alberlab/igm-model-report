@@ -67,6 +67,7 @@ parser = argparse.ArgumentParser(description='Run population analysis pipeline')
 
 parser.add_argument('hss', help='Hss file for population')
 parser.add_argument('-c', '--config', help='Config file for IGM run (infers some parameters)')
+parser.add_argument('-l', '--label', help='Run label to be applied in titles and filenames', default='')
 
 parser.add_argument('--hic', help='Input probability matrix for HiC')
 parser.add_argument('--hic-sigma', type=float, help='Probability cutoff for HiC')
@@ -82,7 +83,8 @@ parser.add_argument('--violation-tolerance', type=float, help='Violation toleran
 
 parser.add_argument('--semiaxes', nargs=3, type=float, help='Specify semiaxes of the envelope')
 
-parser.add_argument('--steps', help='comma separated list of steps to perform. Perform all of the applicable ones by default.'
+parser.add_argument('--steps', help='comma separated list of steps to perform. Perform all of the applicable ones by '
+                                    'default. '
                     ' Possible values: radius_of_gyration, violations, five_shells, radials, radial_density, damid',
                     default='radius_of_gyration,violations,hic,five_shells,radials,radial_density,damid')
 
@@ -260,7 +262,10 @@ if __name__ == '__main__':
     if args.out_dir is None:
         d, f = os.path.split(hssfname)
         b, e = os.path.splitext(f)
-        args.out_dir = os.path.join(d, 'QC_' + b)
+        if args.label:
+            args.out_dir = os.path.join(d, 'QC_' + args.label)
+        else:
+            args.out_dir = os.path.join(d, 'QC_' + b)
     logger.info(f'Output will be written to: {args.out_dir}')
 
     process_user_args(cfg, args)
@@ -283,26 +288,31 @@ if __name__ == '__main__':
             os.makedirs(args.out_dir)
         os.chdir(args.out_dir)
 
+        # Dump label for future automated processing
+        # ==========================================
+        with open('label.txt', 'w') as f:
+            f.write(args.label)
+
         # Summary stats
         # =============
 
         if 'violations' in steps:
-            report_violations(hssfname, violation_tolerance=cfg['tol'])
+            report_violations(hssfname, violation_tolerance=cfg['tol'], run_label=args.label)
 
         # Radius of gyration
         # ==================
         if 'radius_of_gyration' in steps:
-            report_radius_of_gyration(hssfname)
+            report_radius_of_gyration(hssfname, run_label=args.label)
 
         # Five shells
         # ===========
         if 'five_shells' in steps:
-            report_shells(hssfname, semiaxes=cfg['semiaxes'])
+            report_shells(hssfname, semiaxes=cfg['semiaxes'], run_label=args.label)
 
         # Radial positions
         # ================
         if 'radials' in steps:
-            report_radials(hssfname, semiaxes=cfg['semiaxes'])
+            report_radials(hssfname, semiaxes=cfg['semiaxes'], run_label=args.label)
 
         # Damid
         # =====
@@ -313,7 +323,8 @@ if __name__ == '__main__':
                 report_damid(hssfname,
                              damid_file=cfg['damid']['input_profile'],
                              contact_range=cfg['damid']['contact_range'],
-                             semiaxes=cfg['semiaxes'])
+                             semiaxes=cfg['semiaxes'],
+                             run_label=args.label)
 
         # Compare matrices
         # ================
@@ -323,7 +334,10 @@ if __name__ == '__main__':
             else:
                 report_hic(hssfname,
                            input_matrix=cfg['hic']['input_matrix'],
-                           )
+                           inter_sigma=cfg['hic']['inter_sigma'],
+                           intra_sigma=cfg['hic']['intra_sigma'],
+                           contact_range=cfg['hic']['contact_range'],
+                           run_label=args.label)
 
         logger.info('Done.')
 

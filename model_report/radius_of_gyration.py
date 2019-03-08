@@ -72,7 +72,10 @@ def boxplots_group(data, group_labels, n_per_row=6, subplot_width=10,
     return f, plots
 
 
-def report_radius_of_gyration(hssfname):
+def report_radius_of_gyration(hssfname, run_label=''):
+    if run_label:
+        run_label = '-' + run_label
+
     logger = logging.getLogger('GyrRadius')
     try:
 
@@ -81,8 +84,8 @@ def report_radius_of_gyration(hssfname):
         with HssFile(hssfname, 'r') as hss:
             chroms = hss.genome.chroms
             rgs = get_chroms_rgs(hss.coordinates, hss.index)
-            np.savez('radius_of_gyration/chromosomes.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
-        boxplots_group(rgs, chroms, outfile='radius_of_gyration/rgs.pdf')
+            np.savez(f'radius_of_gyration/chromosomes{run_label}.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
+        boxplots_group(rgs, chroms, outfile=f'radius_of_gyration/rgs{run_label}.pdf')
         logger.info('Done.')
     except:
         traceback.print_exc()

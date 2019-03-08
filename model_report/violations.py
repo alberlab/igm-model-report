@@ -45,9 +45,11 @@ def plot_violation_histogram(h, edges, tol=0.05, nticks=20, title='', figsize=(1
         plt.savefig(outfile)
 
 
-def report_violations(hssfname, violation_tolerance):
+def report_violations(hssfname, violation_tolerance, run_label=''):
     logger = logging.getLogger('Violations')
     logger.info('Executing violation report...')
+    if run_label:
+        run_label = '-' + run_label
     try:
 
         create_folder('violations')
@@ -56,10 +58,10 @@ def report_violations(hssfname, violation_tolerance):
             stats = json.loads(hss['summary'][()])
 
         # save a copy of the data
-        with open('violations/stats.json', 'w') as f:
+        with open(f'violations/stats{run_label}.json', 'w') as f:
             json.dump(stats, f, indent=4)
 
-        with open('violations/restraints_summary.txt', 'w') as f:
+        with open(f'violations/restraints_summary{run_label}.txt', 'w') as f:
             f.write('# type imposed violated\n')
             f.write('"all" {} {}\n'.format(
                 stats['n_imposed'],
@@ -76,11 +78,12 @@ def report_violations(hssfname, violation_tolerance):
 
         h = stats['histogram']['counts']
         edges = stats['histogram']['edges']
-        plot_violation_histogram(h, edges, violation_tolerance, nticks=10, title="all violations", outfile="violations/histograms/summary.pdf")
+        plot_violation_histogram(h, edges, violation_tolerance, nticks=10, title="all violations",
+                                 outfile=f"violations/histograms/summary{run_label}.pdf")
         for k, v in stats['byrestraint'].items():
             h = v['histogram']['counts']
             plot_violation_histogram(h, edges, violation_tolerance, nticks=10, title=k,
-                                     outfile="violations/histograms/{}.pdf".format(k))
+                                     outfile=f"violations/histograms/{k}{run_label}.pdf")
 
         # TODO: energies and stuff
         logger.info('Done.')

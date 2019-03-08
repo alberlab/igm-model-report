@@ -66,7 +66,9 @@ def radial_plot_p(edges, val, cmap='Greys', **kwargs):
         ax.add_patch(c)
 
 
-def report_radials(hssfname, semiaxes=None):
+def report_radials(hssfname, semiaxes=None, run_label=''):
+    if run_label:
+        run_label = '-' + run_label
     logger = logging.getLogger('Radials')
     logger.info('Executing Radials report...')
     try:
@@ -82,16 +84,16 @@ def report_radials(hssfname, semiaxes=None):
                 except:
                     semiaxes = np.array([5000., 5000., 5000.])
             radials = get_radial_level(hss.coordinates, index, semiaxes)
-        np.savetxt('radials/radials.txt', radials)
+        np.savetxt(f'radials/radials{run_label}.txt', radials)
         plot_by_chromosome(radials, index.get_haploid())
-        plt.savefig('radials/radials.pdf')
+        plt.savefig(f'radials/radials{run_label}.pdf')
 
-        if os.path.isfile('shells/ave_radial.txt'):
+        if os.path.isfile(f'shells/ave_radial{run_label}.txt'):
             logger.info('Note: normalizing with respect to last shell')
-            n = np.loadtxt('shells/ave_radial.txt')[-1]
-            np.savetxt('radials/radials_norm.txt', radials / n)
+            n = np.loadtxt(f'shells/ave_radial{run_label}.txt')[-1]
+            np.savetxt(f'radials/radials_norm{run_label}.txt', radials / n)
             plot_by_chromosome(radials / n, index.get_haploid())
-            plt.savefig('radials/radials_norm.pdf')
+            plt.savefig(f'radials/radials_norm{run_label}.pdf')
         logger.info('Done.')
 
     except:

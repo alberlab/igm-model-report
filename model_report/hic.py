@@ -15,8 +15,9 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
-
-def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
+def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, run_label=''):
+    if run_label:
+        run_label = '-' + run_label
     logger = logging.getLogger("HiC")
     logger.info('Executing HiC report')
 
@@ -50,7 +51,7 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
         cm = Contactmatrix(input_matrix)
         create_folder("matrix_comparison")
         outmap = get_simulated_hic(hssfname, float(contact_range))
-        outmap.save("matrix_comparison/outmap.hcs")
+        outmap.save(f"matrix_comparison/outmap{run_label}.hcs")
 
         with HssFile(hssfname, 'r') as hss:
             genome = hss.genome
@@ -72,14 +73,14 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
                 # using a large plotting cutoff when nothing is imposed, so that nothing will be shown
                 cutoff = 2.0
 
-            plot_comparison(x1, x2, file='matrix_comparison/{}.pdf'.format(c),
+            plot_comparison(x1, x2, file=f'matrix_comparison/{c}{run_label}.pdf',
                             labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
 
             x1.matrix.data[x1.matrix.data < cutoff] = 0
-            plot_comparison(x1, x2, file='matrix_comparison/imposed_{}.pdf'.format(c),
+            plot_comparison(x1, x2, file=f'matrix_comparison/imposed_{c}{run_label}.pdf',
                             labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
 
-        with open('matrix_comparison/intra_correlations.txt', 'w') as f:
+        with open(f'matrix_comparison/intra_correlations{run_label}.txt', 'w') as f:
             f.write('# chrom all imposed non_imposed\n')
             for c, x, y, z in zip(genome.chroms,
                                   correlations['intra']['all'],
@@ -96,9 +97,9 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
         if inter_sigma:
             # get interchromsomal correlations
             correlations['inter']['restrained'] = pearsonr(x[intermask & (x >= inter_sigma)].ravel(),
-                                                           y[intermask & (x >= inter_sigma)].ravel())
+                                                           y[intermask & (x >= inter_sigma)].ravel())[0]
             correlations['inter']['non_restrained'] = pearsonr(x[intermask & (x < inter_sigma)].ravel(),
-                                                               y[intermask & (x < inter_sigma)].ravel())
+                                                               y[intermask & (x < inter_sigma)].ravel())[0]
 
             cutoff = inter_sigma
         else:
@@ -110,14 +111,14 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
         del y
         del intermask
 
-        plot_comparison(cm, outmap, file='matrix_comparison/inter_chromosomal.pdf'.format(c),
+        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
         cm.matrix.data[cm.matrix.data < cutoff] = 0
-        plot_comparison(cm, outmap, file='matrix_comparison/inter_chromosomal_imposed.pdf'.format(c),
+        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
 
         # write correlations
-        with open('matrix_comparison/inter_correlations.txt', 'w') as f:
+        with open(f'matrix_comparison/inter_correlations{run_label}.txt', 'w') as f:
             f.write('# all imposed non_imposed\n')
             f.write('{:8.5f} {:8.5f} {:8.5f}\n'.format(
                 correlations['inter']['all'],
@@ -131,7 +132,7 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range):
             cm.matrix.toarray().ravel(),
             outmap.matrix.toarray().ravel(),
             bins=(100, 100),
-            outfile='matrix_comparison/histogram2d.pdf',
+            outfile=f'matrix_comparison/histogram2d{run_label}.pdf',
             nlevels=10,
         )
 
