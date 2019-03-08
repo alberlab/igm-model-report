@@ -111,12 +111,6 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
         del y
         del intermask
 
-        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
-                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
-        cm.matrix.data[cm.matrix.data < cutoff] = 0
-        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
-                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
-
         # write correlations
         with open(f'matrix_comparison/inter_correlations{run_label}.txt', 'w') as f:
             f.write('# all imposed non_imposed\n')
@@ -135,6 +129,13 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
             outfile=f'matrix_comparison/histogram2d{run_label}.pdf',
             nlevels=10,
         )
+
+        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
+                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+        cm.matrix.data[cm.matrix.data < cutoff] = 0
+        plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
+                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+
 
     except KeyboardInterrupt:
         logger.error('User interrupt. Exiting.')
