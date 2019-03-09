@@ -85,15 +85,18 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
                     semiaxes = np.array([5000., 5000., 5000.])
             radials = get_radial_level(hss.coordinates, index, semiaxes)
         np.savetxt(f'radials/radials{run_label}.txt', radials)
-        plot_by_chromosome(radials, index.get_haploid())
+        f, _ = plot_by_chromosome(radials, index.get_haploid(), vmin=.4, vmax=1.0)
+        f.suptitle(f'Radial position per bead {run_label}')
         plt.savefig(f'radials/radials{run_label}.pdf')
+        plt.savefig(f'radials/radials{run_label}.png')
 
         if os.path.isfile(f'shells/ave_radial{run_label}.txt'):
             logger.info('Note: normalizing with respect to last shell')
             n = np.loadtxt(f'shells/ave_radial{run_label}.txt')[-1]
             np.savetxt(f'radials/radials_norm{run_label}.txt', radials / n)
-            plot_by_chromosome(radials / n, index.get_haploid())
+            plot_by_chromosome(radials / n, index.get_haploid(), vmin=.4, vmax=1.0)
             plt.savefig(f'radials/radials_norm{run_label}.pdf')
+            plt.savefig(f'radials/radials_norm{run_label}.png')
         logger.info('Done.')
 
     except KeyboardInterrupt:

@@ -78,12 +78,16 @@ def report_violations(hssfname, violation_tolerance, run_label=''):
 
         h = stats['histogram']['counts']
         edges = stats['histogram']['edges']
-        plot_violation_histogram(h, edges, violation_tolerance, nticks=10, title="all violations",
+        plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
+                                 title="Histogram of all Violations",
                                  outfile=f"violations/histograms/summary{run_label}.pdf")
+        plt.savefig(f"violations/histograms/summary{run_label}.png")
         for k, v in stats['byrestraint'].items():
             h = v['histogram']['counts']
-            plot_violation_histogram(h, edges, violation_tolerance, nticks=10, title=k,
+            plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
+                                     title='Histogram of Violations for ' + k,
                                      outfile=f"violations/histograms/{k}{run_label}.pdf")
+            plt.savefig(f"violations/histograms/{k}{run_label}.png")
 
         # TODO: energies and stuff
         logger.info('Done.')

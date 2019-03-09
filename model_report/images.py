@@ -6,7 +6,7 @@ from alabtools import HssFile
 from .utils import create_folder
 
 
-def render_structures(hssfname, n=10, random=True):
+def render_structures(hssfname, n=4, random=True):
     logger = logging.getLogger('Render')
     logger.info('Starting render... (it may take a while)')
 
@@ -15,7 +15,7 @@ def render_structures(hssfname, n=10, random=True):
         with HssFile(hssfname, 'r') as h:
 
             if random:
-                ii = np.random.choice(range(h.nstruct), replace=False)
+                ii = np.random.choice(range(h.nstruct), size=n, replace=False)
             else:
                 ii = list(range(min(n, h.nstruct)))
 

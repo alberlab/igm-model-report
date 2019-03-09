@@ -78,10 +78,12 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
 
             plot_comparison(x1, x2, file=f'matrix_comparison/{c}{run_label}.pdf',
                             labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
+            plt.savefig(f'matrix_comparison/{c}{run_label}.png')
 
             x1.matrix.data[x1.matrix.data < cutoff] = 0
             plot_comparison(x1, x2, file=f'matrix_comparison/imposed_{c}{run_label}.pdf',
                             labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
+            plt.savefig(f'matrix_comparison/imposed_{c}{run_label}.png')
 
         with open(f'matrix_comparison/intra_correlations{run_label}.txt', 'w') as f:
             f.write('# chrom all imposed non_imposed\n')
@@ -139,12 +141,15 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
             xlabel='INPUT',
             ylabel='OUTPUT'
         )
+        plt.savefig(f'matrix_comparison/histogram2d{run_label}.png')
 
         plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+        plt.savefig(f'matrix_comparison/inter_chromosomal{run_label}.png')
         cm.matrix.data[cm.matrix.data < cutoff] = 0
         plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+        plt.savefig(f'matrix_comparison/inter_chromosomal_imposed{run_label}.png')
 
     except KeyboardInterrupt:
         logger.error('User interrupt. Exiting.')

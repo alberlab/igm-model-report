@@ -42,9 +42,12 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_
             np.savetxt(f'shells/ave_radial{run_label}.txt', np.average(ave_shell_rad, axis=0))
             midpoints = (edges[:-1] + edges[1:]) / 2
             plt.figure()
+            plt.title('Radial position distributions per shell')
             for j in range(nshell):
                 plt.bar(midpoints, height=pos_histos[j], alpha=.6, width=hvmax/hnbins, label='shell {:d}'.format(j+1))
+            plt.legend()
             plt.savefig(f'shells/positions_histograms_by_shell{run_label}.pdf')
+            plt.savefig(f'shells/positions_histograms_by_shell{run_label}.png')
         logger.info('Done.')
 
     except KeyboardInterrupt:

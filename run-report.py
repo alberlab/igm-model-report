@@ -57,6 +57,7 @@ from model_report.hic import report_hic
 from model_report.radials import report_radials
 from model_report.shells import report_shells
 from model_report.images import render_structures
+from model_report.html_report import generate_html_report
 
 # prepare a logger
 logging.basicConfig()
@@ -87,7 +88,7 @@ parser.add_argument('--semiaxes', nargs=3, type=float, help='Specify semiaxes of
 parser.add_argument('--steps', help='comma separated list of steps to perform. Perform all of the applicable ones by '
                                     'default. '
                     ' Possible values: radius_of_gyration, violations, five_shells, radials, radial_density, damid',
-                    default='radius_of_gyration,violations,hic,five_shells,radials,radial_density,damid,images')
+                    default='radius_of_gyration,violations,hic,shells,radials,radial_density,damid,images')
 
 parser.add_argument('-o', '--out-dir', help='Output directory')
 
@@ -307,7 +308,7 @@ if __name__ == '__main__':
 
         # Five shells
         # ===========
-        if 'five_shells' in steps:
+        if 'shells' in steps:
             report_shells(hssfname, semiaxes=cfg['semiaxes'], run_label=args.label)
 
         # Radial positions
@@ -342,9 +343,16 @@ if __name__ == '__main__':
 
         logger.info('Done.')
 
+        # Render images
+        # =============
         if 'images' in steps:
             render_structures(hssfname)
 
+        # Create html summary
+        # ===================
+        html = generate_html_report(args.out_dir)
+        with open(op.join(args.out_dir, 'report.html'), 'w') as out:
+            out.write(html)
     finally:
         os.chdir(call_dir)
 

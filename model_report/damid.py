@@ -67,6 +67,7 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
             plt.xlabel('input')
             plt.ylabel('output')
             plt.savefig(f'damid/scatter{run_label}.pdf')
+            plt.savefig(f'damid/scatter{run_label}.png')
         logger.info('Done.')
 
     except KeyboardInterrupt:
