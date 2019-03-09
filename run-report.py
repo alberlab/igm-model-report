@@ -56,6 +56,7 @@ from model_report.damid import report_damid
 from model_report.hic import report_hic
 from model_report.radials import report_radials
 from model_report.shells import report_shells
+from model_report.images import render_structures
 
 # prepare a logger
 logging.basicConfig()
@@ -86,7 +87,7 @@ parser.add_argument('--semiaxes', nargs=3, type=float, help='Specify semiaxes of
 parser.add_argument('--steps', help='comma separated list of steps to perform. Perform all of the applicable ones by '
                                     'default. '
                     ' Possible values: radius_of_gyration, violations, five_shells, radials, radial_density, damid',
-                    default='radius_of_gyration,violations,hic,five_shells,radials,radial_density,damid')
+                    default='radius_of_gyration,violations,hic,five_shells,radials,radial_density,damid,images')
 
 parser.add_argument('-o', '--out-dir', help='Output directory')
 
@@ -340,6 +341,9 @@ if __name__ == '__main__':
                            run_label=args.label)
 
         logger.info('Done.')
+
+        if 'images' in steps:
+            render_structures(hssfname)
 
     finally:
         os.chdir(call_dir)
