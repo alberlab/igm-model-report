@@ -66,6 +66,26 @@ def radial_plot_p(edges, val, cmap='Greys', **kwargs):
         ax.add_patch(c)
 
 
+def plot_radial_density(hssfname, semiaxes, n=11, vmax=1.1, run_label=''):
+
+    with HssFile(hssfname, 'r') as hss:
+
+        crd = hss.coordinates.reshape((hss.nstruct * hss.nbead, 3))
+        radials = np.sqrt(np.sum(np.square(crd / semiaxes), axis=1))
+
+    counts, edges = np.histogram(radials, bins=n, range=(0, vmax))
+    volumes = np.array([edges[i + 1]**3 - edges[i]**3 for i in range(n)])
+    plt.figure()
+    plt.title(f'Radial density distribution {run_label}')
+    plt.bar(np.arange(n) + 0.5, height=counts / volumes, width=1)
+    plt.xticks(range(n + 1), ['{:.2f}'.format(x) for x in edges], rotation=60)
+    plt.tight_layout()
+    plt.savefig(f'radials/density_histo{run_label}.pdf')
+    plt.savefig(f'radials/density_histo{run_label}.png')
+
+    np.savetxt(f'radials/density_histo{run_label}.txt', counts / volumes)
+
+
 def report_radials(hssfname, semiaxes=None, run_label=''):
     if run_label:
         run_label = '-' + run_label
@@ -85,10 +105,13 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
                     semiaxes = np.array([5000., 5000., 5000.])
             radials = get_radial_level(hss.coordinates, index, semiaxes)
         np.savetxt(f'radials/radials{run_label}.txt', radials)
-        f, _ = plot_by_chromosome(radials, index.get_haploid(), vmin=.4, vmax=1.0)
-        f.suptitle(f'Radial position per bead {run_label}')
+        plot_by_chromosome(radials, index.get_haploid(), vmin=.4, vmax=1.0,
+                           suptitle=f'Radial position per bead {run_label}')
+
         plt.savefig(f'radials/radials{run_label}.pdf')
         plt.savefig(f'radials/radials{run_label}.png')
+
+        plot_radial_density(hssfname, semiaxes, run_label=run_label)
 
         if os.path.isfile(f'shells/ave_radial{run_label}.txt'):
             logger.info('Note: normalizing with respect to last shell')
@@ -97,6 +120,7 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
             plot_by_chromosome(radials / n, index.get_haploid(), vmin=.4, vmax=1.0)
             plt.savefig(f'radials/radials_norm{run_label}.pdf')
             plt.savefig(f'radials/radials_norm{run_label}.png')
+
         logger.info('Done.')
 
     except KeyboardInterrupt:

@@ -67,7 +67,7 @@ def boxplots_group(data, group_labels, n_per_row=6, subplot_width=10,
         bp = plots[ip].boxplot(boxdata, labels=group_labels[i:i + n_per_row], patch_artist=True, showfliers=False)
         set_box_colors(bp, color)
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     if outfile is not None:
         plt.savefig(outfile)
     return f, plots
@@ -88,7 +88,7 @@ def report_radius_of_gyration(hssfname, run_label=''):
             rgs = get_chroms_rgs(hss.coordinates, hss.index)
             np.savez(f'radius_of_gyration/chromosomes{run_label}.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
         boxplots_group(rgs, chroms,
-                       title=f'R_g{run_label}',
+                       title=f'Chromosomes Radii of Gyration {run_label}',
                        outfile=f'radius_of_gyration/rgs{run_label}.pdf')
         plt.savefig(f'radius_of_gyration/rgs{run_label}.png')
         logger.info('Done.')

@@ -88,7 +88,7 @@ parser.add_argument('--semiaxes', nargs=3, type=float, help='Specify semiaxes of
 parser.add_argument('--steps', help='comma separated list of steps to perform. Perform all of the applicable ones by '
                                     'default. '
                     ' Possible values: radius_of_gyration, violations, five_shells, radials, radial_density, damid',
-                    default='radius_of_gyration,violations,hic,shells,radials,radial_density,damid,images')
+                    default='rgs,violations,hic,shells,radials,damid,images')
 
 parser.add_argument('-o', '--out-dir', help='Output directory')
 
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 
         # Radius of gyration
         # ==================
-        if 'radius_of_gyration' in steps:
+        if 'rgs' in steps:
             report_radius_of_gyration(hssfname, run_label=args.label)
 
         # Five shells
