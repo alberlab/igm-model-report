@@ -7,7 +7,7 @@ from alabtools.analysis import get_simulated_hic
 
 from alabtools.plots import plot_comparison, red
 
-from .plots import logloghist2d
+from .plots import logloghist2d, density_histogram_2d
 from .utils import create_folder
 
 import matplotlib
@@ -130,18 +130,33 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
             ))
 
         # create a scatter plot of probabilities:
-        plt.figure(figsize=(10, 10))
         logloghist2d(
             cm.matrix.toarray().ravel(),
             outmap.matrix.toarray().ravel(),
             bins=(100, 100),
-            outfile=f'matrix_comparison/histogram2d{run_label}.pdf',
+            outfile=f'matrix_comparison/log_histogram2d{run_label}.pdf',
             nlevels=10,
             sigma=minsigma,
             xlabel='INPUT',
-            ylabel='OUTPUT'
+            ylabel='OUTPUT',
+            smooth={'sigma': 1, 'truncate': 2}
         )
-        plt.savefig(f'matrix_comparison/histogram2d{run_label}.png')
+        plt.savefig(f'matrix_comparison/log_histogram2d{run_label}.png')
+        plt.close()
+
+        density_histogram_2d(
+            cm.matrix.toarray().ravel(),
+            outmap.matrix.toarray().ravel(),
+            bins=(100, 100),
+            outfile=f'matrix_comparison/linear_histogram2d{run_label}.pdf',
+            nlevels=10,
+            sigma=minsigma,
+            xlabel='INPUT',
+            ylabel='OUTPUT',
+            smooth={'sigma': 1, 'truncate': 2}
+        )
+        plt.savefig(f'matrix_comparison/linear_histogram2d{run_label}.png')
+        plt.close()
 
         plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
                         labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
