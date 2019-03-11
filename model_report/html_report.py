@@ -78,7 +78,7 @@ def handle_file(filename, lines):
     lines.append(f'<a href="file:///{op.abspath(filename)}">'
                  f'{op.basename(filename)}</a></p>')
     _, ext = op.splitext(filename)
-    if ext in ['.png', '.jpg']:
+    if ext in ['.png', '.jpg', '.bmp', '.gif']:
         data_uri = base64.b64encode(
             open(filename, 'rb').read()).decode('utf-8').replace('\n', '')
         lines.append(f'<img width="100%" src="data:image/{ext[1:]};base64,{data_uri}"/>')
@@ -144,7 +144,7 @@ def generate_html_report(folder):
     try:
         with open('label.txt', 'r') as f:
             run_label = f.read()
-    except:
+    except IOError:
         run_label = ''
 
     if run_label == '':

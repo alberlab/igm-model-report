@@ -22,7 +22,7 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_
                     semiaxes = hss['envelope']['params'][()]
                     if len(semiaxes.shape) == 0:  # is scalar
                         semiaxes = np.array([semiaxes, semiaxes, semiaxes])
-                except:
+                except KeyError:
                     semiaxes = np.array([5000., 5000., 5000.])
 
             n = hss.nbead
@@ -56,6 +56,6 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error in shells step\n==============================')

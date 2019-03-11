@@ -99,7 +99,7 @@ def report_radius_of_gyration(hssfname, run_label=''):
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error in radius of gyration step\n==============================')
 

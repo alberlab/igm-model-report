@@ -126,6 +126,6 @@ def report_violations(hssfname, violation_tolerance, run_label=''):
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error trying to compute violation statistics\n==============================')

@@ -26,7 +26,7 @@ def render_structures(hssfname, n=4, random=True):
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error in rendering step\n==============================')
 

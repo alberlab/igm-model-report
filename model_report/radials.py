@@ -102,7 +102,7 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
                     semiaxes = hss['envelope']['params'][()]
                     if len(semiaxes.shape) == 0:  # is scalar
                         semiaxes = np.array([semiaxes, semiaxes, semiaxes])
-                except:
+                except KeyError:
                     semiaxes = np.array([5000., 5000., 5000.])
             radials = get_radial_level(hss.coordinates, index, semiaxes)
         np.savetxt(f'radials/radials{run_label}.txt', radials)
@@ -130,6 +130,6 @@ def report_radials(hssfname, semiaxes=None, run_label=''):
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error in radials step\n==============================')

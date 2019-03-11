@@ -26,7 +26,7 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
                     semiaxes = hss['envelope']['params'][()]
                     if len(semiaxes.shape) == 0:  # is scalar
                         semiaxes = np.array([semiaxes, semiaxes, semiaxes])
-                except:
+                except KeyError:
                     semiaxes = np.array([5000., 5000., 5000.])
 
             out_damid_prob = np.zeros(len(index.copy_index))
@@ -75,6 +75,6 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
         logger.error('User interrupt. Exiting.')
         exit(1)
 
-    except:
+    except Exception:
         traceback.print_exc()
         logger.error('Error in DamID step\n==============================')
