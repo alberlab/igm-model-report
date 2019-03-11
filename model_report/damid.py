@@ -43,8 +43,8 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
 
                 for i in range(n_copies):
                     x = hss.get_bead_crd(ii[i])
-                    R = np.array(semiaxes) * (1 - contact_range)
-                    d_sq[i * hss.nstruct:(i + 1) * hss.nstruct] = snormsq_ellipse(x, R, r)
+                    nuc_rad = np.array(semiaxes) * (1 - contact_range)
+                    d_sq[i * hss.nstruct:(i + 1) * hss.nstruct] = snormsq_ellipse(x, nuc_rad, r)
 
                 contact_count = np.count_nonzero(d_sq >= 1)
                 out_damid_prob[locid] = float(contact_count) / hss.nstruct / n_copies

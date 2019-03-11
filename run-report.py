@@ -97,29 +97,29 @@ parser.add_argument('-o', '--out-dir', help='Output directory')
 # it directly on the file, and I just pushed a commit to do that on igm.
 # If we don't find the data on the file itself, we may read it from a configuration file, or from the step
 # database.
-def get_parameters_from_igm_config(cfg: dict, basedir='.') -> dict:
+def get_parameters_from_igm_config(igm_cfg: dict, basedir='.') -> dict:
     report_config = {}
-    if cfg.get('restraints/Hi-C', False):
+    if igm_cfg.get('restraints/Hi-C', False):
         report_config['hic'] = {}
-        fpath = cfg.get('restraints/Hi-C/input_matrix')
+        fpath = igm_cfg.get('restraints/Hi-C/input_matrix')
         if not op.isabs(fpath):
             fpath = op.abspath(op.join(basedir, fpath))
         report_config['hic']['input_matrix'] = fpath
-        report_config['hic']['contact_range'] = cfg.get('restraints/Hi-C/contact_range')
-    if cfg.get('restraints/DamID', False):
+        report_config['hic']['contact_range'] = igm_cfg.get('restraints/Hi-C/contact_range')
+    if igm_cfg.get('restraints/DamID', False):
         report_config['damid'] = {}
-        fpath = cfg.get('restraints/DamID/input_profile')
+        fpath = igm_cfg.get('restraints/DamID/input_profile')
         if not op.isabs(fpath):
             fpath = op.abspath(op.join(basedir, fpath))
         report_config['damid']['input_profile'] = fpath
-        report_config['damid']['contact_range'] = cfg.get('restraints/DamID/contact_range')
-    report_config['tol'] = cfg.get('optimization/violation_tolerance', 0.05)
+        report_config['damid']['contact_range'] = igm_cfg.get('restraints/DamID/contact_range')
+    report_config['tol'] = igm_cfg.get('optimization/violation_tolerance', 0.05)
 
-    if cfg.get('model/restraints/envelope/nucleus_semiaxes', False):
-        report_config['semiaxes'] = np.array(cfg.get('model/restraints/envelope/nucleus_semiaxes'))
-    elif cfg.get('model/restraints/envelope/nucleus_radius', False):
+    if igm_cfg.get('model/restraints/envelope/nucleus_semiaxes', False):
+        report_config['semiaxes'] = np.array(igm_cfg.get('model/restraints/envelope/nucleus_semiaxes'))
+    elif igm_cfg.get('model/restraints/envelope/nucleus_radius', False):
         report_config['semiaxes'] = np.array(
-            [cfg.get('model/restraints/envelope/nucleus_radius')] * 3
+            [igm_cfg.get('model/restraints/envelope/nucleus_radius')] * 3
         )
     else:
         report_config['semiaxes'] = np.array([5000.0, 5000.0, 5000.0])
@@ -127,18 +127,18 @@ def get_parameters_from_igm_config(cfg: dict, basedir='.') -> dict:
     # check if we have runtime information in this config
     hic_ok = 'hic' not in report_config
     damid_ok = 'damid' not in report_config
-    if 'runtime' in cfg:
-        if cfg.get('runtime/Hi-C/sigma', False):
-            report_config['hic']['inter_sigma'] = cfg.get('runtime/Hi-C/sigma')
-            report_config['hic']['intra_sigma'] = cfg.get('runtime/Hi-C/sigma')
+    if 'runtime' in igm_cfg:
+        if igm_cfg.get('runtime/Hi-C/sigma', False):
+            report_config['hic']['inter_sigma'] = igm_cfg.get('runtime/Hi-C/sigma')
+            report_config['hic']['intra_sigma'] = igm_cfg.get('runtime/Hi-C/sigma')
             hic_ok = True
-        elif cfg.get('runtime/Hi-C/inter_sigma', False):
-            report_config['hic']['inter_sigma'] = cfg.get('runtime/Hi-C/inter_sigma')
-            report_config['hic']['intra_sigma'] = cfg.get('runtime/Hi-C/intra_sigma')
+        elif igm_cfg.get('runtime/Hi-C/inter_sigma', False):
+            report_config['hic']['inter_sigma'] = igm_cfg.get('runtime/Hi-C/inter_sigma')
+            report_config['hic']['intra_sigma'] = igm_cfg.get('runtime/Hi-C/intra_sigma')
             hic_ok = True
 
-        if cfg.get('runtime/DamID/sigma', False):
-            report_config['damid']['sigma'] = cfg.get('runtime/DamID/sigma')
+        if igm_cfg.get('runtime/DamID/sigma', False):
+            report_config['damid']['sigma'] = igm_cfg.get('runtime/DamID/sigma')
             damid_ok = True
 
     if hic_ok and damid_ok:
@@ -149,75 +149,75 @@ def get_parameters_from_igm_config(cfg: dict, basedir='.') -> dict:
         report_config['hic']['inter_sigma'] = None
         report_config['hic']['intra_sigma'] = None
 
-        if cfg.get('restraints/Hi-C/sigma_list', False):  # old style sigma lists
-            l1 = cfg.get('restraints/Hi-C/sigma_list')
+        if igm_cfg.get('restraints/Hi-C/sigma_list', False):  # old style sigma lists
+            l1 = igm_cfg.get('restraints/Hi-C/sigma_list')
             if len(l1):
                 report_config['hic']['inter_sigma'] = l1[-1]
                 report_config['hic']['intra_sigma'] = l1[-1]
 
-        if cfg.get('restraints/Hi-C/inter_sigma_list', False):  # new style
-            l1 = cfg.get('restraints/Hi-C/inter_sigma_list', False)
-            l2 = cfg.get('restraints/Hi-C/intra_sigma_list', False)
+        if igm_cfg.get('restraints/Hi-C/inter_sigma_list', False):  # new style
+            l1 = igm_cfg.get('restraints/Hi-C/inter_sigma_list', False)
+            l2 = igm_cfg.get('restraints/Hi-C/intra_sigma_list', False)
             if len(l1):
                 report_config['hic']['inter_sigma'] = l1[-1]
             if len(l2):
                 report_config['hic']['intra_sigma'] = l2[-1]
 
     if not damid_ok:
-        if cfg.get('restraints/DamID/sigma_list', False):  # old style sigma lists
-            report_config['damid']['sigma'] = cfg.get('restraints/DamID/sigma_list')[-1]
+        if igm_cfg.get('restraints/DamID/sigma_list', False):  # old style sigma lists
+            report_config['damid']['sigma'] = igm_cfg.get('restraints/DamID/sigma_list')[-1]
     return report_config
 
 
-def process_user_args(cfg, args):
+def process_user_args(igm_cfg, user_args):
     # overwrite arguments if specified from command line
 
-    if args.hic is not None:
-        if 'hic' not in cfg:
-            cfg['hic'] = {}
-        cfg['hic']['input_matrix'] = os.path.abspath(args.hic)
+    if user_args.hic is not None:
+        if 'hic' not in igm_cfg:
+            igm_cfg['hic'] = {}
+        igm_cfg['hic']['input_matrix'] = os.path.abspath(user_args.hic)
 
-    if args.damid is not None:
-        if 'damid' not in cfg:
-            cfg['damid'] = {}
-        cfg['damid']['input_profile'] = os.path.abspath(args.damid)
+    if user_args.damid is not None:
+        if 'damid' not in igm_cfg:
+            igm_cfg['damid'] = {}
+        igm_cfg['damid']['input_profile'] = os.path.abspath(user_args.damid)
 
-    if args.hic_sigma is not None:
-        if 'hic' not in cfg:
+    if user_args.hic_sigma is not None:
+        if 'hic' not in igm_cfg:
             logger.warning('HiC sigma specified, but no hic map in config. Ignoring.')
         else:
-            cfg['hic']['inter_sigma'] = args.hic_sigma
-            cfg['hic']['intra_sigma'] = args.hic_sigma
+            igm_cfg['hic']['inter_sigma'] = user_args.hic_sigma
+            igm_cfg['hic']['intra_sigma'] = user_args.hic_sigma
 
-    if args.hic_inter_sigma is not None:
-        if 'hic' not in cfg:
+    if user_args.hic_inter_sigma is not None:
+        if 'hic' not in igm_cfg:
             logger.warning('HiC inter sigma specified, but no hic map in config. Ignoring.')
         else:
-            cfg['hic']['inter_sigma'] = args.hic_inter_sigma
+            igm_cfg['hic']['inter_sigma'] = user_args.hic_inter_sigma
 
-    if args.hic_intra_sigma is not None:
-        if 'hic' not in cfg:
+    if user_args.hic_intra_sigma is not None:
+        if 'hic' not in igm_cfg:
             logger.warning('HiC intra sigma specified, but no hic map in config. Ignoring.')
         else:
-            cfg['hic']['intra_sigma'] = args.hic_intra_sigma
+            igm_cfg['hic']['intra_sigma'] = user_args.hic_intra_sigma
 
-    if args.hic_contact_range is not None:
-        if 'hic' not in cfg:
+    if user_args.hic_contact_range is not None:
+        if 'hic' not in igm_cfg:
             logger.warning('HiC contact range specified, but no hic map in config. Ignoring.')
         else:
-            cfg['hic']['contact_range'] = args.hic_contact_range
+            igm_cfg['hic']['contact_range'] = user_args.hic_contact_range
 
-    if args.damid_contact_range is not None:
-        if 'damid' not in cfg:
+    if user_args.damid_contact_range is not None:
+        if 'damid' not in igm_cfg:
             logger.warning('DamID contact range specified, but no DamID restraints in config. Ignoring.')
         else:
-            cfg['damid']['contact_range'] = args.hic_contact_range
+            igm_cfg['damid']['contact_range'] = user_args.hic_contact_range
 
-    if args.violation_tolerance is not None:
-        cfg['tol'] = args.violation_tolerance
+    if user_args.violation_tolerance is not None:
+        igm_cfg['tol'] = user_args.violation_tolerance
 
-    if args.semiaxes is not None:
-        cfg['semiaxes'] = np.array(args.semiaxes)
+    if user_args.semiaxes is not None:
+        igm_cfg['semiaxes'] = np.array(user_args.semiaxes)
 
 
 if __name__ == '__main__':
@@ -225,18 +225,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # get the absolute filename
+    if not op.isfile(args.hss):
+        logger.error('Cannot find file %s. Exiting.', args.hss)
+        exit(1)
     hssfname = os.path.realpath(args.hss)
 
     cfg = None
 
     # if the user explicitly specified a configuration file, we read it
-
     if args.config:
         logger.info(f'Reading config from {args.config}')
         cfg = get_parameters_from_igm_config(Config(args.config))
     else:
         # else, let's first see if the hss file contains configuration infos
-
         with HssFile(hssfname) as f:
             if 'config_data' in f:
                 d, _ = os.path.split(hssfname)

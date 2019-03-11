@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 from scipy.ndimage import gaussian_filter
 
 
 def logloghist2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)), outfile=None, vmin=1e2, vmax=1e5, nlevels=5,
                  sigma=None, xlabel='in', ylabel='out', smooth=None, **kwargs):
-    from matplotlib.colors import LogNorm
 
     if ranges[0] is None:
         x0, x1 = np.min(d1), np.max(d1)
@@ -69,11 +69,12 @@ def logloghist2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)), outfile
     return f, p, q, e1, e2
 
 
-def density_histogram_2d(d1, d2, bins=(100, 100), ranges=[(1e-3, 1), (1e-3, 1)],
+def density_histogram_2d(d1, d2, bins=(100, 100), ranges=((1e-3, 1), (1e-3, 1)),
                          outfile=None, vmin=1e1, vmax=1e5, nlevels=5,
                          xlabel='in', ylabel='out', smooth=None, **kwargs):
-    import numpy as np
-    from matplotlib.colors import LogNorm
+
+    if ranges is None:
+        ranges = (None, None)
 
     if ranges[0] is None:
         x0, x1 = np.min(d1), np.max(d1)
@@ -118,7 +119,7 @@ def density_histogram_2d(d1, d2, bins=(100, 100), ranges=[(1e-3, 1), (1e-3, 1)],
 
     h[h > vmax] = vmax
     levels = np.logspace(np.log10(vmin), np.log10(vmax), nlevels, base=10)
-    p = plt.contourf(midx, midy, h, norm=LogNorm(vmin, vmax),
+    p = plt.contourf(grid_x, grid_y, h, norm=LogNorm(vmin, vmax),
                      cmap='Blues', levels=levels, **kwargs)
     plt.plot([bottom_left, top_right], [bottom_left, top_right], 'k--')
     plt.xlim(xx[0], xx[-1])

@@ -10,8 +10,6 @@ from alabtools.plots import plot_comparison, red
 from .plots import logloghist2d, density_histogram_2d
 from .utils import create_folder
 
-import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
@@ -77,13 +75,13 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
                 cutoff = 2.0
 
             fig = plot_comparison(x1, x2, file=f'matrix_comparison/{c}{run_label}.pdf',
-                            labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
+                                  labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
             fig.savefig(f'matrix_comparison/{c}{run_label}.png')
             plt.close(fig)
 
             x1.matrix.data[x1.matrix.data < cutoff] = 0
             fig = plot_comparison(x1, x2, file=f'matrix_comparison/imposed_{c}{run_label}.pdf',
-                            labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
+                                  labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.2)
             fig.savefig(f'matrix_comparison/imposed_{c}{run_label}.png')
             plt.close(fig)
 
@@ -161,13 +159,15 @@ def report_hic(hssfname, input_matrix, inter_sigma, intra_sigma, contact_range, 
         plt.close(f)
 
         f = plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal{run_label}.pdf',
-                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+                            labels=['INPUT', 'OUTPUT'], title=f'inter-chromosomal{run_label}',
+                            cmap=red, vmax=0.05)
         f.savefig(f'matrix_comparison/inter_chromosomal{run_label}.png')
         plt.close(f)
         cm.matrix.data[cm.matrix.data < cutoff] = 0
 
         f = plot_comparison(cm, outmap, file=f'matrix_comparison/inter_chromosomal_imposed{run_label}.pdf',
-                        labels=['INPUT', 'OUTPUT'], title=c, cmap=red, vmax=0.05)
+                            labels=['INPUT', 'OUTPUT'], title=f'inter-chromosomal (restrained only){run_label}',
+                            cmap=red, vmax=0.05)
         f.savefig(f'matrix_comparison/inter_chromosomal_imposed{run_label}.png')
         plt.close(f)
 

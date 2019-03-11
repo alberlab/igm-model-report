@@ -129,13 +129,12 @@ def process_dir(folder, lvl, lines):
     lines.append(f'</div>')
 
 
-def generate_html_report(folder, embed=True):
+def generate_html_report(folder):
     """
     Scrapes the output folder and generates a single, navigable file.
     Parameters
     ----------
     folder : str
-    embed : bool
     """
 
     while folder.endswith('/'):
@@ -148,8 +147,14 @@ def generate_html_report(folder, embed=True):
     except:
         run_label = ''
 
+    if run_label == '':
+        run_label = op.basename(folder)
+
     lines = []
     process_dir(folder, 1, lines)
     head = f'<head><title>IGM Report: {op.basename(folder)}</title><style>{css}</style></head>'
-    body = '<body>' + '\n'.join(lines) + '</body>'
+
+    header = f'<h1>{run_label}</h1><h2>{op.abspath(folder)}</h2><hr>'
+
+    body = '<body>' + header + '\n'.join(lines) + '</body>'
     return head + body

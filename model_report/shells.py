@@ -30,6 +30,7 @@ def report_shells(hssfname, semiaxes=None, nshell=5, hvmax=1.5, hnbins=150, run_
             bds = kth + [n]
             ave_shell_rad = np.empty((hss.nstruct, nshell))
             pos_histos = np.zeros((nshell, hnbins))
+            edges = None
             for i in range(hss.nstruct):
                 radials = np.sqrt(np.sum(np.square(crd[i] / semiaxes), axis=1))
                 radials = np.partition(radials, kth)
