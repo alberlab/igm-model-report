@@ -11,7 +11,7 @@ from .utils import create_folder
 
 
 def plot_violation_histogram(h, edges, tol=0.05, nticks=20, title='', figsize=(10, 4), outfile=None, log=False):
-    plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize)
     step = edges[1] - edges[0]
     tick_step = int(len(edges) / nticks)
 
@@ -57,6 +57,7 @@ def plot_violation_histogram(h, edges, tol=0.05, nticks=20, title='', figsize=(1
     plt.tight_layout()
     if outfile is not None:
         plt.savefig(outfile)
+    return fig
 
 
 def report_violations(hssfname, violation_tolerance, run_label=''):
@@ -92,27 +93,31 @@ def report_violations(hssfname, violation_tolerance, run_label=''):
 
         h = stats['histogram']['counts']
         edges = stats['histogram']['edges']
-        plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
-                                 title="Histogram of all Violations",
-                                 outfile=f"violations/histograms/summary{run_label}.pdf")
-        plt.savefig(f"violations/histograms/summary{run_label}.png")
+        fig = plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
+                                       title="Histogram of all Violations",
+                                       outfile=f"violations/histograms/summary{run_label}.pdf")
+        fig.savefig(f"violations/histograms/summary{run_label}.png")
+        plt.close(fig)
 
-        plot_violation_histogram(h, edges, violation_tolerance, nticks=10, log=True,
-                                 title="Histogram of all Violations (Log)",
-                                 outfile=f"violations/histograms/summary_log-{run_label}.pdf")
-        plt.savefig(f"violations/histograms/summary_log{run_label}.png")
+        fig = plot_violation_histogram(h, edges, violation_tolerance, nticks=10, log=True,
+                                       title="Histogram of all Violations (Log)",
+                                       outfile=f"violations/histograms/summary_log-{run_label}.pdf")
+        fig.savefig(f"violations/histograms/summary_log{run_label}.png")
+        plt.close(fig)
 
         for k, v in stats['byrestraint'].items():
             h = v['histogram']['counts']
-            plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
-                                     title='Histogram of Violations for ' + k,
-                                     outfile=f"violations/histograms/{k}{run_label}.pdf")
-            plt.savefig(f"violations/histograms/{k}{run_label}.png")
+            fig = plot_violation_histogram(h, edges, violation_tolerance, nticks=10,
+                                           title='Histogram of Violations for ' + k,
+                                           outfile=f"violations/histograms/{k}{run_label}.pdf")
+            fig.savefig(f"violations/histograms/{k}{run_label}.png")
+            plt.close(fig)
 
-            plot_violation_histogram(h, edges, violation_tolerance, nticks=10, log=True,
-                                     title='Histogram of Violations (Log) for ' + k,
-                                     outfile=f"violations/histograms/{k}_log{run_label}.pdf")
-            plt.savefig(f"violations/histograms/{k}_log{run_label}.png")
+            fig = plot_violation_histogram(h, edges, violation_tolerance, nticks=10, log=True,
+                                           title='Histogram of Violations (Log) for ' + k,
+                                           outfile=f"violations/histograms/{k}_log{run_label}.pdf")
+            fig.savefig(f"violations/histograms/{k}_log{run_label}.png")
+            plt.close(fig)
 
         # TODO: energies and stuff
         logger.info('Done.')

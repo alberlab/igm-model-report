@@ -50,7 +50,7 @@ def set_box_colors(bp, clr):
 
 
 def boxplots_group(data, group_labels, n_per_row=6, subplot_width=10,
-                   subplot_height=2.5, vmin=800, vmax=2500, outfile=None,
+                   subplot_height=2.5, vmin=800, vmax=3500, outfile=None,
                    title='', color='#fb7b04'):
     '''
     Splits a large number of boxex across multiple rows
@@ -87,10 +87,11 @@ def report_radius_of_gyration(hssfname, run_label=''):
             chroms = hss.genome.chroms
             rgs = get_chroms_rgs(hss.coordinates, hss.index)
             np.savez(f'radius_of_gyration/chromosomes{run_label}.npz', **{c: arr for c, arr in zip(hss.genome.chroms, rgs)})
-        boxplots_group(rgs, chroms,
-                       title=f'Chromosomes Radii of Gyration {run_label}',
-                       outfile=f'radius_of_gyration/rgs{run_label}.pdf')
-        plt.savefig(f'radius_of_gyration/rgs{run_label}.png')
+        fig, _ = boxplots_group(rgs, chroms,
+                                title=f'Chromosomes Radii of Gyration {run_label}',
+                                outfile=f'radius_of_gyration/rgs{run_label}.pdf')
+        fig.savefig(f'radius_of_gyration/rgs{run_label}.png')
+        plt.close(fig)
         logger.info('Done.')
 
     except KeyboardInterrupt:

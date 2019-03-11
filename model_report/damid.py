@@ -53,7 +53,7 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
         if damid_file:
             damid_profile = np.loadtxt(damid_file, dtype='float32')
             np.savetxt(f'damid/input{run_label}.txt', damid_profile)
-            plt.figure(figsize=(4, 4))
+            fig = plt.figure(figsize=(4, 4))
             plt.title(f'DamID{run_label}')
             vmax = max(np.nanmax(damid_profile), np.nanmax(out_damid_prob))
             vmin = min(np.nanmin(damid_profile), np.nanmin(out_damid_prob))
@@ -66,8 +66,9 @@ def report_damid(hssfname, damid_file, contact_range, semiaxes=None, run_label='
             plt.plot([vmin, vmax], [vmin, vmax], 'k--')
             plt.xlabel('input')
             plt.ylabel('output')
-            plt.savefig(f'damid/scatter{run_label}.pdf')
-            plt.savefig(f'damid/scatter{run_label}.png')
+            fig.savefig(f'damid/scatter{run_label}.pdf')
+            fig.savefig(f'damid/scatter{run_label}.png')
+            plt.close(fig)
         logger.info('Done.')
 
     except KeyboardInterrupt:
